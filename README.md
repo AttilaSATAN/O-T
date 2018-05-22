@@ -5,7 +5,7 @@ This repo will be deleted after one week. (06-04-2018)
 ## Task
 
 Everyone knows Pokémon. So far 7 generations of pokémon released in last 20 years. In pokémon universe there are 18 types of these pocket monsters. 
-The types are normal, fight, flying, poison, ground, rock, bug, ghost, steel, fire, water, grass, steel, fire, water, grass, electric, psychc, ice, dragon, dark, and, fairy. Each one of them has advanteges and disadvantes to others. For example; a **fire** type pokémon hits 2x to a **grass** type but hits 0.5x to a **rock** pokémon. You can find the complete list at [this url](http://unrealitymag.com/wp-content/uploads/2014/11/fylyCdC.png).
+The types are normal, fight, flying, poison, ground, rock, bug, ghost, steel, fire, water, grass, electric, psychc, ice, dragon, dark, and, fairy. Each one of them has advanteges and disadvantes to others. For example; a **fire** type pokémon hits 2x to a **grass** type but hits 0.5x to a **rock** pokémon. You can find the complete list at [this url](http://unrealitymag.com/wp-content/uploads/2014/11/fylyCdC.png).
 
 In this task you are going to create a **pokedex** which will be accessible with the HTTP api. The data source will be given to you. You can use Python or Go programming languages.
 
