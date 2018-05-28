@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -76,7 +78,20 @@ type BaseData struct {
 	Moves    []Move    `json:"moves"`
 }
 
+var data BaseData
+
 func listHandler(w http.ResponseWriter, r *http.Request) {
+
+	written, err := json.Marshal(data.Pokemons)
+	if err != nil {
+		panic(err)
+	}
+	i, err := w.Write(written)
+	if err != nil {
+		fmt.Println("error after ")
+		fmt.Println(i)
+		panic(err)
+	}
 	log.Println("/list url:", r.URL)
 	fmt.Fprint(w, "The List Handler\n")
 }
@@ -90,8 +105,18 @@ func otherwise(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Hello World\n")
 }
 
+func createIndex() {
+
+}
+
 func main() {
-	//TODO: read data.json to a BaseData
+	// data.json to a BaseData ref
+	raw, err := ioutil.ReadFile("./data.json")
+	if err != nil {
+		panic(err)
+	}
+
+	json.Unmarshal(raw, &data)
 
 	http.HandleFunc("/list", listHandler)
 	http.HandleFunc("/get", getHandler)
