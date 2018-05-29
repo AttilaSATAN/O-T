@@ -1,4 +1,4 @@
-package main
+package pokedex
 
 import (
 	"encoding/json"
@@ -79,6 +79,7 @@ type BaseData struct {
 }
 
 var data BaseData
+var pokemonIndexByTypeName map[string]int
 
 func listHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -105,21 +106,26 @@ func otherwise(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Hello World\n")
 }
 
-func createIndex() {
+func createIndex() error {
 
 }
 
-func main() {
+func populate() error {
 	// data.json to a BaseData ref
 	raw, err := ioutil.ReadFile("./data.json")
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	json.Unmarshal(raw, &data)
 
-	http.HandleFunc("/list", listHandler)
-	http.HandleFunc("/get", getHandler)
+	return createIndex()
+}
+
+func New() {
+
+	err := populate()
+
 	//TODO: add more
 	http.HandleFunc("/", otherwise)
 	log.Println("starting server on :8080")
