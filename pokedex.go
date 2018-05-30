@@ -81,37 +81,18 @@ type BaseData struct {
 var data BaseData
 var pokemonIndexByTypeName map[string]int
 
-func listHandler(w http.ResponseWriter, r *http.Request) {
-
-	written, err := json.Marshal(data.Pokemons)
-	if err != nil {
-		panic(err)
-	}
-	i, err := w.Write(written)
-	if err != nil {
-		fmt.Println("error after ")
-		fmt.Println(i)
-		panic(err)
-	}
-	log.Println("/list url:", r.URL)
-	fmt.Fprint(w, "The List Handler\n")
-}
-
 func getHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("/get url:", r.URL)
 	fmt.Fprint(w, "The Get Handler\n")
 }
 
-func otherwise(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello World\n")
-}
-
 func createIndex() error {
 
+	return nil
 }
 
+// populate read data.json and unmarshals it to a BaseData instance
 func populate() error {
-	// data.json to a BaseData ref
 	raw, err := ioutil.ReadFile("./data.json")
 	if err != nil {
 		return err
@@ -122,12 +103,11 @@ func populate() error {
 	return createIndex()
 }
 
-func New() {
+func New() (error, *PokedexServer) {
 
 	err := populate()
-
+	server := NewServer(8080)
 	//TODO: add more
-	http.HandleFunc("/", otherwise)
-	log.Println("starting server on :8080")
-	http.ListenAndServe(":8080", nil)
+
+	return err, server
 }
