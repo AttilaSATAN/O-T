@@ -43,6 +43,11 @@ type Pokemon struct {
 	CaptureRate         float64  `json:"CaptureRate"`
 	FleeRate            float64  `json:"FleeRate"`
 	BuddyDistanceNeeded int      `json:"BuddyDistanceNeeded"`
+	IndexID             int
+	IndexName           []string
+	IndexTypeI          []string
+	IndexTypeII         []string
+	IndexWeaknesses     []string
 }
 
 // Move is an attack information. The
