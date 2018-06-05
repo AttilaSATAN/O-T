@@ -2,7 +2,6 @@ package pokedex
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -50,34 +49,81 @@ func wellcomeHandler(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "Hoşgeldin :)")
 }
 
-//
-func all(w http.ResponseWriter, r *http.Request) {
+func responder(w http.ResponseWriter, r *http.Request, data interface{}) (err error) {
 
-	pokemons, err := json.Marshal(data.Pokemons)
+	pokemons, err := json.Marshal(data)
 	if err != nil {
-		badImplementationHandler(w, r, err)
+		return
 	}
 	_, err = w.Write(pokemons)
 	if err != nil {
-		badImplementationHandler(w, r, err)
+		return
 	}
+	return
+
 }
 
 // pokemonListHandler for listin pokemons
-func listHandler(w http.ResponseWriter, r *http.Request) {
+func pokemonListHandler(w http.ResponseWriter, r *http.Request) {
 
-	query := r.URL.Query()
-
-	if val, pres := query["name"]; pres {
-		fmt.Println(val)
-		fmt.Println(query.Get("a"))
-		//index := PokemonIndexByName[val]
+	if responded, err := pokemonQueryRouter(w, r); responded {
+		if err != nil {
+			badImplementationHandler(w, r, err)
+		}
 	} else {
-		all(w, r)
+		responder(w, r, data.Pokemons)
 	}
 }
 
-func queryRouter(w http.ResponseWriter, r *http.Request) (bool, error) {
+// pokemonListHandler for listing pokemon types
+func typeListHandler(w http.ResponseWriter, r *http.Request) {
+
+	responder(w, r, data.Types)
+
+}
+
+// pokemonListHandler for listing moves
+func moveListHandler(w http.ResponseWriter, r *http.Request) {
+
+	responder(w, r, data.Moves)
+
+}
+
+func pokemonQueryRouter(w http.ResponseWriter, r *http.Request) (bool, error) {
+
+	pokemons := data.Pokemons
+	query := r.URL.Query()
+
+	for _, index := range []string{"name", "typeI", "typeII"} {
+		if _, pres := query[index]; pres {
+			name := query.Get(index)
+			pokemons = pokemons.FilterBy(index, name)
+		}
+	}
+
+	if _, s := query["sortBy"]; s {
+		by := query.Get("sortBy")
+		pokemons = pokemons.Sort(by)
+	}
+
+	if err := responder(w, r, pokemons); err != nil {
+		return false, err
+	}
 
 	return true, nil
+}
+
+func pokemonByNameHandlerProvider(p Pokemon) func(http.ResponseWriter, *http.Request) {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		pokemon, err := json.Marshal(p)
+		if err != nil {
+			return
+		}
+		_, err = w.Write(pokemon)
+		if err != nil {
+			return
+		}
+		return
+	}
 }

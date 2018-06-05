@@ -6,45 +6,37 @@ import (
 	"strconv"
 )
 
+//Endpoint is a represantation for an API end-point. An end-point is a single URI
 type Endpoint struct {
-	Uri            string
+	URI            string
 	HandleFunction func(http.ResponseWriter, *http.Request)
 }
 
-// PokedexServer is a struct for representing server
-type PokedexServer struct {
-	Endpoints []Endpoint
+// Server is a struct for representing server
+type Server struct {
+	Endpoints []Endpoint `json:"uri`
 	Port      int
 }
 
-type Meta struct {
-	Total int
-}
-
-type Response struct {
-	Data []Pokemon
-	Meta Meta
-}
-
-// Serve is for registering handlers
-func (s *PokedexServer) Serve() {
+// Serve is initiation point for server. After defining the endpoints with AddEndpoint call this function.
+func (s *Server) Serve() {
 
 	log.Println("starting server on :", s.Port)
 
 	for _, endpoint := range s.Endpoints {
-		http.HandleFunc(endpoint.Uri, endpoint.HandleFunction)
+		http.HandleFunc(endpoint.URI, endpoint.HandleFunction)
 	}
 
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(s.Port), nil))
 }
 
 // AddEndpoint adds new endpoint
-func (s *PokedexServer) AddEndpoint(uri string, handler func(http.ResponseWriter, *http.Request)) {
-	s.Endpoints = append(s.Endpoints, Endpoint{uri, handler})
+func (s *Server) AddEndpoint(URI string, handler func(http.ResponseWriter, *http.Request)) {
+	s.Endpoints = append(s.Endpoints, Endpoint{URI, handler})
 }
 
 // NewServer creates and returns a new server instance
-func NewServer(port int) *PokedexServer {
+func NewServer(port int) *Server {
 
-	return &PokedexServer{Port: port}
+	return &Server{Port: port}
 }

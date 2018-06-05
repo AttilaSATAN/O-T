@@ -2,32 +2,8 @@ package pokedex
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"strconv"
-	"strings"
 )
-
-var data BaseData
-var pokemonIndexByTypeName map[string]int
-
-func createIndexes() error {
-
-	for n, p := range data.Pokemons {
-		fmt.Println(n, p)
-		PokemonIndexByName[p.Name] = n
-
-		pok := &data.Pokemons[n]
-		pok.IndexID, _ = strconv.Atoi(p.Number)
-		pok.IndexName = []string{strings.ToLower(pok.Name)}
-		pok.IndexTypeI = []string{}
-		for _, t1 := range p.TypeI {
-			pok.IndexTypeI = append(pok.IndexTypeI, t1)
-		}
-	}
-
-	return nil
-}
 
 // populate read data.json and unmarshals it to a BaseData instance
 func populate() error {
@@ -38,19 +14,29 @@ func populate() error {
 
 	json.Unmarshal(raw, &data)
 
+	/*
+	* Sıralama, metin manimülasyonu ve filtreleme gibi metodlarla BaseData'yı
+	* dolaşarak sonuç toplayabilirdik ancak bu uzun vadede işlem gücü ihtiyacını arttıracaktır.
+	* Bunun yerine indeksleme yaparak bir kaç kilobyte rem ile microsunucudan tasarruf sağlayabiliriz.
+	 */
 	return createIndexes()
 }
 
-// New creates a new `PokedexServer` instance registers handlers and populate virtual database
-func New() (*PokedexServer, error) {
+// New creates a new `Server` instance registers handlers and populate virtual database
+func New() (*Server, error) {
 
 	if err := populate(); err != nil {
 		return nil, err
 	}
 
-	server := NewServer(8080)
+	server = NewServer(8080)
 	server.AddEndpoint("/", otherwiseHandler)
-	server.AddEndpoint("/api/pokemon/list", listHandler)
-	server.AddEndpoint("/api/pokemon/list/all", listHandler)
+	server.AddEndpoint("/api/pokemon/list", pokemonListHandler)
+	server.AddEndpoint("/api/type/list", typeListHandler)
+	server.AddEndpoint("/api/move/list", moveListHandler)
+	for pokName, pok := range PokemonIndexByName {
+		server.AddEndpoint("/api/pokemon/"+pokName, pokemonByNameHandlerProvider(*pok))
+	}
+
 	return server, nil
 }

@@ -1,5 +1,10 @@
 package pokedex
 
+import (
+	"sort"
+)
+
+//Type is pokemon type. Also it's a very ugly name for a struct.
 type Type struct {
 	// Name of the type
 	Name string `json:"name"`
@@ -7,47 +12,6 @@ type Type struct {
 	EffectiveAgainst []string `json:"effectiveAgainst"`
 	// The weak types that against, damage multiplize 0.5x
 	WeakAgainst []string `json:"weakAgainst"`
-}
-
-type Pokemon struct {
-	Number         string   `json:"Number"`
-	Name           string   `json:"Name"`
-	Classification string   `json:"Classification"`
-	TypeI          []string `json:"Type I"`
-	TypeII         []string `json:"Type II,omitempty"`
-	Weaknesses     []string `json:"Weaknesses"`
-	FastAttackS    []string `json:"Fast Attack(s)"`
-	Weight         string   `json:"Weight"`
-	Height         string   `json:"Height"`
-	Candy          struct {
-		Name     string `json:"Name"`
-		FamilyID int    `json:"FamilyID"`
-	} `json:"Candy"`
-	NextEvolutionRequirements struct {
-		Amount int    `json:"Amount"`
-		Family int    `json:"Family"`
-		Name   string `json:"Name"`
-	} `json:"Next Evolution Requirements,omitempty"`
-	NextEvolutions []struct {
-		Number string `json:"Number"`
-		Name   string `json:"Name"`
-	} `json:"Next evolution(s),omitempty"`
-	PreviousEvolutions []struct {
-		Number string `json:"Number"`
-		Name   string `json:"Name"`
-	} `json:"Previous evolution(s),omitempty"`
-	SpecialAttacks      []string `json:"Special Attack(s)"`
-	BaseAttack          int      `json:"BaseAttack"`
-	BaseDefense         int      `json:"BaseDefense"`
-	BaseStamina         int      `json:"BaseStamina"`
-	CaptureRate         float64  `json:"CaptureRate"`
-	FleeRate            float64  `json:"FleeRate"`
-	BuddyDistanceNeeded int      `json:"BuddyDistanceNeeded"`
-	IndexID             int
-	IndexName           []string
-	IndexTypeI          []string
-	IndexTypeII         []string
-	IndexWeaknesses     []string
 }
 
 // Move is an attack information. The
@@ -68,12 +32,57 @@ type Move struct {
 	Duration int `json:"duration"`
 }
 
+//PokemonList type for collecting pokemons.
+type PokemonList []Pokemon
+
 // BaseData is a struct for reading data.json
 type BaseData struct {
-	Types    []Type    `json:"types"`
-	Pokemons []Pokemon `json:"pokemons"`
-	Moves    []Move    `json:"moves"`
+	Types    []Type      `json:"types"`
+	Pokemons PokemonList `json:"pokemons"`
+	Moves    []Move      `json:"moves"`
 }
 
+// FilterByName is Array#filter translation for PokemonList
+func (data PokemonList) FilterBy(index string, name string) PokemonList {
+	ret := PokemonList{}
+	for _, p := range data {
+		if p.IsIn(index, name) {
+			ret = append(ret, p)
+		}
+	}
+	return ret
+}
+
+func (data PokemonList) Sort(by string) PokemonList {
+
+	if by == "name" || by == "Name" || by == "NAME" {
+		sort.Slice(data, func(i, j int) bool { return data[i].Name < data[j].Name })
+	}
+
+	if by == "baseAttack" || by == "Base Attack" || by == "BASE ATTACK" || by == "BaseAttack" || by == "baseattack" {
+		sort.Slice(data, func(i, j int) bool { return data[i].BaseAttack < data[j].BaseAttack })
+	}
+	if by == "-name" || by == "-Name" || by == "-NAME" {
+		sort.Slice(data, func(i, j int) bool { return data[i].Name > data[j].Name })
+	}
+
+	if by == "-baseAttack" || by == "-Base Attack" || by == "-BASE ATTACK" || by == "-BaseAttack" || by == "-baseattack" {
+		sort.Slice(data, func(i, j int) bool { return data[i].BaseAttack > data[j].BaseAttack })
+	}
+	/*
+	   .
+	   .
+	   .
+	*/
+	return data
+
+}
+
+//data is for storage
+var data BaseData
+
 // PokemonIndexByName is a map for pokemons by their name as keys
-var PokemonIndexByName map[string]int = make(map[string]int)
+var PokemonIndexByName map[string]*Pokemon
+var TypeIndexByName map[string]*Type
+var MoveIndexByName map[string]*Move
+var server *Server
